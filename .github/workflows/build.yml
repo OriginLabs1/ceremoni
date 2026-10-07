@@ -1,0 +1,27 @@
+name: Sovereign Raw Build
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install SDK 34
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - name: Install Kotlin Compiler
+        run: |
+          wget -q https://github.com/JetBrains/kotlin/releases/download/v1.9.22/kotlin-compiler-1.9.22.zip
+          unzip -q kotlin-compiler-1.9.22.zip -d /opt/
+          echo "/opt/kotlinc/bin" >> $GITHUB_PATH
+      - name: Execute Sovereign Build Script
+        run: |
+          chmod +x build.sh
+          ./build.sh
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ceremoni-sovereign-apk
+          path: build/ceremoni.apk
